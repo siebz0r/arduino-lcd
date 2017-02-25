@@ -49,6 +49,8 @@
 
 // Keep track of times the butten has been pushed.
 volatile int buttonPushCounter = 0;
+// Last time the button interrupt was handled.
+volatile long prevButtonInterrupt = 0;
 
 // Initialise LCD
 LiquidCrystal lcd(RS_PIN, E_PIN, DB4_PIN, DB5_PIN, DB6_PIN, DB7_PIN);
@@ -71,9 +73,14 @@ void setup() {
  */
 void buttonISR() {
   int buttonState = digitalRead(BUTTON_PIN);
-  if (buttonState == HIGH) {
-  	buttonPushCounter++;
-    printCounter();
+  long now = millis();
+  // Debounce button by 150 ms
+  if (now - prevButtonInterrupt > 150) {
+    if (buttonState == HIGH) {
+      buttonPushCounter++;
+      printCounter();
+    }
+    prevButtonInterrupt = now;
   }
 }
 
